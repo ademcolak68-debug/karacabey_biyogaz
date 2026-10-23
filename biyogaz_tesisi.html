@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biyogaz Tesisi Yerleşim Krokisi - Vektörel Mavi Baskı</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Inter & Roboto Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Roboto Mono', 'monospace'],
+          },
+          colors: {
+            blueprint: {
+              bg: '#0a192f',
+              panel: '#0e2342',
+              grid: '#13305a',
+              line: '#e2e8f0',
+              accent: '#38bdf8',
+              pipe: '#06b6d4',
+              highlight: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Blueprint Background Pattern */
+    .blueprint-bg {
+      background-color: #0b1d3a;
+      background-image: 
+        linear-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+        linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+      background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+      background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+    }
+
+    /* Light Theme Blueprint Grid */
+    .blueprint-light-bg {
+      background-color: #f8fafc;
+      background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+        linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+      background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+    }
+
+    /* Print Styles */
+    @media print {
+      @page {
+        size: A3 landscape;
+        margin: 0;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-area {
+        width: 100vw !important;
+        height: 100vh !important;
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      svg {
+        width: 100% !important;
+        height: 100% !important;
+      }
+	  
+	  
+    }
+
+    /* Smooth Transitions */
+    .transition-theme {
+      transition: background-color 0.3s ease, color 0.3s ease, stroke 0.3s ease, fill 0.3s ease;
+    }
+
+    /* Equipment Hover Effects */
+    .cad-element {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .cad-element:hover {
+      filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8));
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a192f;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e3a8a;
+      border-radius: 4px;
+    }
+	
+	.zoom-controls {
+    display: flex;
+    gap: 4px;
+    background: rgba(0,0,0,0.3);
+    padding: 2px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.2);
+
+    position: absolute;
+    top: 150px;
+    left: 12px;
+    z-index: 1000;
+}
+
+.zoom-controls button {
+    border: none;
+    padding: 6px 10px;
+}
+
+.zoom-indicator {
+    font-size: 0.8rem;
+    font-family: monospace;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+}
+        
+        .canvas-container {
+            cursor: grab;
+        }
+        .canvas-container:active { cursor: grabbing; }
+        
+        #blueprintSvg {
+            transform-origin: center center;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+		
+/* Tablet ve telefon uyumu: PC görünümünü değiştirmez */
+    #canvasContainer {
+      min-width: 0;
+      min-height: 0;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .zoom-controls {
+      top: 15px;
+      left: 15px;
+    }
+
+    @media screen and (max-width: 768px) {
+      header {
+        padding: 10px 12px !important;
+        gap: 10px !important;
+        align-items: flex-start !important;
+      }
+
+      header h1 {
+        font-size: 15px !important;
+        line-height: 1.25 !important;
+        flex-wrap: wrap;
+      }
+
+      header h1 span {
+        font-size: 10px !important;
+      }
+
+      header > div:first-child > div:first-child {
+        padding: 8px !important;
+      }
+
+      header > div:last-child {
+        gap: 6px !important;
+        width: 100%;
+      }
+
+      header > div:last-child button {
+        padding: 7px 9px !important;
+        font-size: 12px !important;
+      }
+
+      .zoom-controls {
+        top: 10px;
+        left: 10px;
+        gap: 2px;
+      }
+
+      .zoom-controls button {
+        padding: 5px 8px;
+      }
+
+      .zoom-indicator {
+        font-size: 11px;
+        padding: 0 5px;
+      }
+
+      #printableArea {
+        border-radius: 8px;
+      }
+
+      .mobile-info-note,
+      .mobile-signature {
+        max-width: calc(100vw - 16px);
+        gap: 6px !important;
+        padding: 6px 8px !important;
+      }
+
+      .mobile-info-note {
+        bottom: 8px !important;
+        left: 8px !important;
+        font-size: 10px !important;
+      }
+
+      .mobile-signature {
+        bottom: 8px !important;
+        right: 8px !important;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      header {
+        padding: 8px !important;
+        gap: 8px !important;
+      }
+
+      header > div:first-child {
+        gap: 8px !important;
+        width: 100%;
+      }
+
+      header h1 {
+        font-size: 12px !important;
+        letter-spacing: -0.2px;
+      }
+
+      header h1 span {
+        padding: 2px 5px !important;
+      }
+
+      header > div:last-child {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 5px !important;
+      }
+
+      header > div:last-child button {
+			display: flex !important;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 4px;
+			min-width: 0;
+			min-height: 48px;
+			padding: 6px 3px !important;
+			font-size: 12px !important;
+			text-align: center;
+		}
+
+      header > div:last-child button span {
+			display: inline !important;
+			font-size: 11px !important;
+			line-height: 1.2 !important;
+			white-space: normal !important;
+			overflow-wrap: anywhere;
+		}
+
+      .zoom-controls {
+        top: 8px;
+        left: 8px;
+        gap: 1px;
+        padding: 2px;
+      }
+
+      .zoom-controls button {
+        padding: 5px 7px;
+        font-size: 12px;
+      }
+
+      .zoom-indicator {
+        font-size: 10px;
+        padding: 0 4px;
+      }
+
+      #canvasContainer {
+        padding: 4px !important;
+      }
+
+      #printableArea {
+        min-width: 0;
+        border-radius: 5px;
+      }
+
+      .mobile-info-note {
+        left: 6px !important;
+        bottom: 6px !important;
+        right: 6px !important;
+        width: max-content;
+        max-width: calc(100vw - 12px);
+        font-size: 9px !important;
+        padding: 5px 7px !important;
+      }
+
+      .mobile-info-note > div {
+        gap: 4px !important;
+      }
+
+      .mobile-info-note > span:last-child {
+        overflow-wrap: anywhere;
+      }
+
+      .mobile-signature {
+        right: 6px !important;
+        bottom: 6px !important;
+        padding: 5px 7px !important;
+        gap: 5px !important;
+      }
+
+      .mobile-signature > span:first-child {
+        height: 22px !important;
+      }
+
+      .mobile-signature .flex.flex-col span {
+        font-size: 8px !important;
+        letter-spacing: 1px !important;
+      }
+
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .cad-element:hover {
+        filter: none;
+      }
+
+      .zoom-controls button {
+        min-width: 32px;
+        min-height: 32px;
+      }
+    }
+
+	
+	
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans h-full flex flex-col overflow-hidden">
+
+  <!-- Top Navigation & Controls Bar -->
+  <header class="no-print bg-slate-900 border-b border-slate-800 px-4 py-3 flex flex-wrap items-center justify-between gap-4 z-10 shadow-lg">
+    <div class="flex items-center space-x-3">
+      <div class="bg-sky-500/20 text-sky-400 p-2.5 rounded-lg border border-sky-500/30">
+        <i class="fa-solid fa-industry"></i>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg text-white leading-tight flex items-center gap-2">
+          BİYOGAZ TESİSİ YERLEŞİM KROKİSİ
+          <span class="text-xs font-mono bg-sky-950 text-sky-400 border border-sky-800 px-2 py-0.5 rounded-full">REV: 2026.1</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Control Buttons -->
+    <div class="flex items-center flex-wrap gap-2 text-sm font-medium">
+      <!-- Mode Switcher -->
+      <button id="themeToggleBtn" onclick="toggleTheme()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center gap-2 transition">
+        <i class="fa-solid fa-palette text-sky-400" id="themeIcon"></i>
+        <span id="themeLabel">Mavi Baskı Mode</span>
+      </button>
+
+      <!-- Labels Toggle -->
+      <button onclick="toggleLabels()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center gap-2 transition">
+        <i class="fa-solid fa-font text-emerald-400"></i>
+        <span id="labelsLabel">Yazılar: Açık</span>
+      </button>
+
+      <!-- Reset View / Fit -->
+      <button onclick="resetZoom()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center gap-2 transition" title="Görünümü Sıfırla">
+        <i class="fa-solid fa-expand text-indigo-400"></i>
+        <span>Sıfırla</span>
+      </button>
+
+      <!-- Print / Export PDF Button -->
+      <button onclick="triggerPrint()" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg font-semibold shadow-md shadow-sky-900/40 flex items-center gap-2 transition">
+        <i class="fa-solid fa-file-pdf"></i>
+        <span>PDF Al</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Blueprint Canvas Container -->
+  <main class="flex-1 relative overflow-auto flex items-start justify-start p-2 sm:p-4 blueprint-bg transition-theme" id="canvasContainer">
+    <!-- Zoom Kontrol Butonları: çizim alanına göre sabit konum -->
+    <div class="zoom-controls no-print">
+      <button type="button" onclick="zoomOut()" title="Uzaklaştır" aria-label="Uzaklaştır"><i class="fa-solid fa-minus"></i></button>
+      <span class="zoom-indicator" id="zoomVal">100%</span>
+      <button type="button" onclick="zoomIn()" title="Yakınlaştır" aria-label="Yakınlaştır"><i class="fa-solid fa-plus"></i></button>
+      <button type="button" onclick="resetZoom()" title="Sıfırla" aria-label="Yakınlaştırmayı sıfırla"><i class="fa-solid fa-rotate-left"></i></button>
+    </div>
+    
+    <!-- Printable Paper Area -->
+    <div id="printableArea" class="print-area relative w-full h-full max-w-[1400px] max-h-[900px] bg-transparent rounded-xl shadow-2xl border border-sky-500/20 flex flex-col overflow-hidden">
+      
+      <!-- SVG Blueprint Render -->
+      <svg id="blueprintSvg" viewBox="0 0 1200 850" class="w-full h-full text-slate-100 select-none" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <!-- Hatching Pattern for Service Pad / Civil Areas -->
+          <pattern id="hatchPattern" width="12" height="12" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="12" stroke="currentColor" stroke-width="0.8" class="text-sky-500/20" />
+          </pattern>
+          
+          <!-- Secondary Hatching for Special Area -->
+          <pattern id="denseHatch" width="8" height="8" patternTransform="rotate(-45 0 0)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="8" stroke="currentColor" stroke-width="0.6" class="text-sky-400/15" />
+          </pattern>
+
+          <!-- Arrow Marker for Pipe Flow -->
+          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="currentColor" class="text-sky-400" />
+          </marker>
+        </defs>
+
+        <!-- Dynamic Style Block for Theme Support -->
+        <style id="svgThemeStyles">
+          .cad-line { stroke: #f8fafc; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+          .cad-thick { stroke: #ffffff; stroke-width: 2.5; fill: none; }
+          .cad-thin { stroke: #94a3b8; stroke-width: 1; fill: none; }
+          .cad-dash { stroke: #38bdf8; stroke-width: 1.2; stroke-dasharray: 5,4; fill: none; }
+          .pipe-line { stroke: #38bdf8; stroke-width: 2.2; fill: none; }
+          .pipe-secondary { stroke: #f59e0b; stroke-width: 1.8; stroke-dasharray: 4,3; fill: none; }
+          .cad-text { fill: #ffffff; font-family: 'Roboto Mono', monospace; font-size: 11px; font-weight: 600; }
+          .cad-subtext { fill: #94a3b8; font-family: 'Roboto Mono', monospace; font-size: 9px; }
+          .boundary-line { stroke: #38bdf8; stroke-width: 2; stroke-dasharray: 8,4,2,4; fill: none; }
+          .tank-fill { fill: #0e2a4a; fill-opacity: 0.6; }
+          .building-fill { fill: #13305a; fill-opacity: 0.8; }
+        </style>
+
+        <!-- ================= LAYER 1: GRID & PERIMETER BOUNDARY ================= -->
+        <g id="layerBoundary">
+          <!-- Main Outer Fence Boundary (Rounded Rectangle with Notch at Bottom Right) -->
+          <path d="M 120 50 
+                   L 1000 50 
+                   A 30 30 0 0 1 1030 80 
+                   L 1030 580 
+                   L 1030 750 
+                   A 20 20 0 0 1 1010 770 
+                   L 320 770 
+                   A 20 20 0 0 1 300 750 
+                   L 300 580 
+                   A 30 30 0 0 0 270 550 
+                   L 120 550 
+                   A 30 30 0 0 1 90 520 
+                   L 90 80 
+                   A 30 30 0 0 1 120 50 Z" 
+                class="boundary-line" />
+
+          <!-- Perimeter Boundary Posts / Pillars (Small Square Markers) -->
+          <g class="text-sky-400">
+            <!-- Top Line Posts -->
+            <rect x="120" y="46" width="8" height="8" class="cad-line" />
+            <rect x="220" y="46" width="8" height="8" class="cad-line" />
+            <rect x="320" y="46" width="8" height="8" class="cad-line" />
+            <rect x="420" y="46" width="8" height="8" class="cad-line" />
+            <rect x="520" y="46" width="8" height="8" class="cad-line" />
+            <rect x="620" y="46" width="8" height="8" class="cad-line" />
+            <rect x="720" y="46" width="8" height="8" class="cad-line" />
+            <rect x="820" y="46" width="8" height="8" class="cad-line" />
+            <rect x="920" y="46" width="8" height="8" class="cad-line" />
+            <rect x="1000" y="46" width="8" height="8" class="cad-line" />
+
+            <!-- Right Line Posts -->
+            <rect x="1026" y="120" width="8" height="8" class="cad-line" />
+            <rect x="1026" y="220" width="8" height="8" class="cad-line" />
+            <rect x="1026" y="320" width="8" height="8" class="cad-line" />
+            <rect x="1026" y="420" width="8" height="8" class="cad-line" />
+            <rect x="1026" y="520" width="8" height="8" class="cad-line" />
+            <rect x="1026" y="620" width="8" height="8" class="cad-line" />
+            <rect x="1026" y="720" width="8" height="8" class="cad-line" />
+
+            <!-- Bottom Line Posts -->
+            <rect x="920" y="766" width="8" height="8" class="cad-line" />
+            <rect x="820" y="766" width="8" height="8" class="cad-line" />
+            <rect x="720" y="766" width="8" height="8" class="cad-line" />
+            <rect x="620" y="766" width="8" height="8" class="cad-line" />
+            <rect x="520" y="766" width="8" height="8" class="cad-line" />
+            <rect x="420" y="766" width="8" height="8" class="cad-line" />
+            <rect x="320" y="766" width="8" height="8" class="cad-line" />
+
+            <!-- Left Boundary Posts -->
+            <rect x="86" y="120" width="8" height="8" class="cad-line" />
+            <rect x="86" y="220" width="8" height="8" class="cad-line" />
+            <rect x="86" y="320" width="8" height="8" class="cad-line" />
+            <rect x="86" y="420" width="8" height="8" class="cad-line" />
+            <rect x="296" y="620" width="8" height="8" class="cad-line" />
+            <rect x="296" y="720" width="8" height="8" class="cad-line" />
+          </g>
+        </g>
+
+        <!-- ================= LAYER 2: SERVICE PADS & HATCHED PAVING ================= -->
+        <g id="layerCivilHatching">
+          <!-- Main Tank Surround Concrete Pad Hatching -->
+          <path d="M 150 70 
+                   L 970 70 
+                   A 20 20 0 0 1 990 90 
+                   L 990 480 
+                   A 20 20 0 0 1 970 500 
+                   L 420 500 
+                   A 30 30 0 0 1 390 470 
+                   L 390 120 
+                   L 150 120 
+                   Z" 
+                fill="url(#hatchPattern)" class="cad-thin" />
+
+          <!-- Secondary Walkway Hatching between Tanks -->
+          <path d="M 400 480 L 800 480 L 800 680 L 400 680 Z" fill="url(#denseHatch)" opacity="0.5" />
+        </g>
+
+        <!-- ================= LAYER 3: MAIN PROCESS TANKS ================= -->
+        
+        <!-- 1. V-102 BİYOGAZ REAKTORÜ (Top Center Main Reactor) -->
+        <g id="tankV102" class="cad-element">
+          <!-- Outer Circle Footing -->
+          <circle cx="560" cy="250" r="190" class="cad-thick tank-fill" />
+          <!-- Middle Outer Ring Wall -->
+          <circle cx="560" cy="250" r="175" class="cad-line" />
+          <!-- Inner Ring Wall -->
+          <circle cx="560" cy="250" r="150" class="cad-thin" />
+          <!-- Dome Roof Structure Radial Lines (16 Beams) -->
+          <g class="cad-thin">
+            <line x1="560" y1="60" x2="560" y2="440" />
+            <line x1="370" y1="250" x2="750" y2="250" />
+            <line x1="425" y1="115" x2="695" y2="385" />
+            <line x1="425" y1="385" x2="695" y2="115" />
+            <line x1="480" y1="77" x2="640" y2="423" />
+            <line x1="640" y1="77" x2="480" y2="423" />
+            <line x1="387" y1="170" x2="733" y2="330" />
+            <line x1="387" y1="330" x2="733" y2="170" />
+          </g>
+          <!-- Center Agitator Hub & Mixing Shaft Symbol -->
+          <circle cx="560" cy="250" r="14" class="cad-line" fill="#0b1d3a" />
+          <circle cx="560" cy="250" r="5" class="cad-thick" fill="#38bdf8" />
+          
+          <!-- Access Ladder / Service Platform Extensions -->
+          <rect x="360" y="235" width="20" height="30" class="cad-line" />
+          <line x1="360" y1="242" x2="380" y2="242" class="cad-thin" />
+          <line x1="360" y1="250" x2="380" y2="250" class="cad-thin" />
+          <line x1="360" y1="258" x2="380" y2="258" class="cad-thin" />
+
+          <!-- Service Pit (Gözetleme Çukuru) Top Right -->
+          <rect x="720" y="110" width="22" height="18" class="cad-line" />
+          <line x1="720" y1="110" x2="742" y2="128" class="cad-thin" />
+
+          <!-- Label callout line & text -->
+          <g class="label-group">
+            <line x1="560" y1="250" x2="560" y2="170" class="cad-thin" />
+            <rect x="460" y="152" width="200" height="24" rx="4" fill="#0a192f" stroke="#38bdf8" stroke-width="1" />
+            <text x="560" y="168" text-anchor="middle" class="cad-text">V-102 BİYOGAZ REAKTÖRÜ</text>
+          </g>
+        </g>
+
+        <!-- 2. V-103 DEPOLAMA HAVUZU (Bottom Left Tank) -->
+        <g id="tankV103" class="cad-element">
+          <!-- Outer Concrete Ring -->
+          <circle cx="480" cy="580" r="75" class="cad-thick tank-fill" />
+          <!-- Inner Wall Ring -->
+          <circle cx="480" cy="580" r="66" class="cad-line" />
+          <!-- Center Point -->
+          <circle cx="480" cy="580" r="4" class="cad-line" fill="#38bdf8" />
+          <!-- Ladder / Valve Box -->
+          <rect x="420" y="525" width="14" height="14" class="cad-line" />
+
+          <!-- Label -->
+          <g class="label-group">
+            <rect x="400" y="570" width="160" height="20" rx="3" fill="#0a192f" stroke="#38bdf8" stroke-width="0.8" />
+            <text x="480" y="584" text-anchor="middle" class="cad-text" font-size="10">V-103 DEPOLAMA HAVUZU</text>
+          </g>
+        </g>
+
+        <!-- 3. V-101 ÖN DENGELEME HAVUZU (Bottom Right Tank) -->
+        <g id="tankV101" class="cad-element">
+          <!-- Outer Concrete Ring -->
+          <circle cx="670" cy="580" r="75" class="cad-thick tank-fill" />
+          <!-- Inner Wall Ring -->
+          <circle cx="670" cy="580" r="66" class="cad-line" />
+          <!-- Center Point -->
+          <circle cx="670" cy="580" r="4" class="cad-line" fill="#38bdf8" />
+          <!-- Valve Chamber Pit (Gözetleme / Vana Odası) -->
+          <rect x="730" y="525" width="16" height="16" class="cad-line" />
+
+          <!-- Label -->
+          <g class="label-group">
+            <rect x="580" y="570" width="180" height="20" rx="3" fill="#0a192f" stroke="#38bdf8" stroke-width="0.8" />
+            <text x="670" y="584" text-anchor="middle" class="cad-text" font-size="10">V-101 ÖN DENGELEME HAVUZU</text>
+          </g>
+        </g>
+
+
+        <!-- ================= LAYER 4: AUXILIARY BUILDINGS & EQUIPMENT (RIGHT SIDE) ================= -->
+        
+        <!-- Auxiliary Skid Platform (Dengeleme, Pompa & Chiller Grubu) -->
+        <g id="auxiliaryBlock">
+          <!-- Outer Concrete Foundation Pad -->
+          <rect x="760" y="320" width="220" height="170" class="cad-thick building-fill" />
+          <rect x="765" y="325" width="210" height="160" class="cad-thin" />
+
+          <!-- CHILLER 125 m³/sa -->
+          <g id="eqChiller" class="cad-element">
+            <rect x="780" y="335" width="85" height="40" class="cad-line" fill="#0b1d3a" />
+            <circle cx="800" cy="355" r="10" class="cad-thin" />
+            <circle cx="845" cy="355" r="10" class="cad-thin" />
+            <text x="822" y="348" text-anchor="middle" class="cad-subtext" font-size="8">CHILLER</text>
+            <text x="822" y="367" text-anchor="middle" class="cad-subtext" font-size="7">125 m³/sa</text>
+          </g>
+
+          <!-- FeCl3 Dosing System (DT-101 / F-102) -->
+          <g id="eqChemical" class="cad-element">
+            <circle cx="930" cy="350" r="14" class="cad-line" fill="#0b1d3a" />
+            <text x="930" y="353" text-anchor="middle" class="cad-subtext" font-size="7">FeCl3</text>
+            <rect x="900" y="380" width="25" height="25" class="cad-line" />
+            <text x="912" y="395" text-anchor="middle" class="cad-subtext" font-size="7">DT-101</text>
+          </g>
+
+          <!-- Kojenerasyon Unit (CHP Power Generator Block) -->
+          <g id="eqKojenerasyon" class="cad-element">
+            <rect x="780" y="400" width="105" height="75" class="cad-line" fill="#0b1d3a" />
+            <!-- Internal Engine / Generator Symbol Lines -->
+            <rect x="790" y="410" width="40" height="55" class="cad-thin" />
+            <circle cx="855" cy="437" r="16" class="cad-line" />
+            <text x="855" y="441" text-anchor="middle" class="cad-text" font-size="11">G</text>
+            <text x="832" y="468" text-anchor="middle" class="cad-text" font-size="9">KOJENERASYON</text>
+          </g>
+
+          <!-- Manifold & Valve Pit (Gözetleme Çukuru) -->
+          <g id="eqManifold">
+            <rect x="520" y="415" width="55" height="35" class="cad-line" fill="#0b1d3a" />
+            <line x1="520" y1="415" x2="575" y2="450" class="cad-thin" />
+            <line x1="575" y1="415" x2="520" y2="450" class="cad-thin" />
+            <text x="547" y="463" text-anchor="middle" class="cad-subtext">DETAY-8 VANA ODASI</text>
+          </g>
+        </g>
+
+        <!-- ================= LAYER 5: ELECTRICAL & TRANSFORMER KIOSK (BOTTOM RIGHT) ================= -->
+        <g id="powerBlock">
+          <!-- TRAFO KÖŞK ALANI -->
+          <g id="eqTrafo" class="cad-element">
+            <rect x="740" y="700" width="220" height="55" class="cad-thick building-fill" />
+            <rect x="745" y="705" width="120" height="45" class="cad-line" />
+            <text x="805" y="726" text-anchor="middle" class="cad-text" font-size="10">TRAFO KÖŞK</text>
+            <text x="805" y="738" text-anchor="middle" class="cad-text" font-size="10">ALANI</text>
+
+            <!-- Direk Tipi Trafo Sub-Station -->
+            <rect x="880" y="708" width="70" height="38" class="cad-dash" />
+            <text x="915" y="725" text-anchor="middle" class="cad-subtext" font-size="8">Direk Tipi</text>
+            <text x="915" y="736" text-anchor="middle" class="cad-subtext" font-size="8">Trafo</text>
+          </g>
+
+          <!-- JENERATÖR ROOM -->
+          <g id="eqGenerator" class="cad-element">
+            <rect x="550" y="705" width="150" height="50" class="cad-thick building-fill" />
+            <rect x="560" y="713" width="50" height="34" class="cad-line" />
+            <circle cx="585" cy="730" r="10" class="cad-thin" />
+            <text x="585" y="733" text-anchor="middle" class="cad-subtext" font-size="8">GEN</text>
+            <text x="650" y="734" text-anchor="middle" class="cad-text" font-size="10">JENERATÖR</text>
+          </g>
+        </g>
+
+        <!-- ================= LAYER 6: FLARE STACK & SAFETY ZONE (BOTTOM LEFT) ================= -->
+        <g id="flareBlock" class="cad-element">
+          <!-- Safety Distance Buffer Ring (150m³/h Flare zone) -->
+          <circle cx="210" cy="710" r="110" class="cad-dash" stroke-opacity="0.6" />
+          
+          <!-- Concrete Pad -->
+          <rect x="180" y="685" width="60" height="50" class="cad-line" fill="#0b1d3a" />
+          
+          <!-- Flare Stack Piping Base Symbol -->
+          <circle cx="210" cy="710" r="12" class="cad-thick" />
+          <line x1="200" y1="710" x2="220" y2="710" class="cad-line" />
+          <line x1="210" y1="700" x2="210" y2="720" class="cad-line" />
+
+          <!-- Flame Icon / Flare Label -->
+          <rect x="120" y="660" width="180" height="20" rx="3" fill="#0a192f" stroke="#38bdf8" stroke-width="0.8" />
+          <text x="210" y="674" text-anchor="middle" class="cad-text" font-size="9">YAKMA BACASI (150 m³/h)</text>
+        </g>
+
+        <!-- ================= LAYER 7: PIPING NETWORK & PROCESS CONNECTIONS ================= -->
+        <g id="layerPiping">
+          <!-- Primary Biogas & Slurry Lines (Cyan Solid Lines) -->
+          <!-- Slurry Feed Line: V-101 to V-102 -->
+          <path d="M 670 505 L 670 435 L 575 435" class="pipe-line" marker-end="url(#arrow)" />
+          
+          <!-- Digested Slurry Line: V-102 to V-103 -->
+          <path d="M 520 435 L 480 435 L 480 505" class="pipe-line" marker-end="url(#arrow)" />
+
+          <!-- Biogas Gas Line: V-102 to Chiller / Chemical Dosing -->
+          <path d="M 720 250 L 820 250 L 820 335" class="pipe-line" marker-end="url(#arrow)" />
+
+          <!-- Clean Gas Line: Chiller to Kojenerasyon -->
+          <path d="M 820 375 L 820 400" class="pipe-line" marker-end="url(#arrow)" />
+
+          <!-- Emergency Gas Line to Flare (Yakma Bacası) -->
+          <path d="M 520 425 L 210 425 L 210 600" class="pipe-secondary" marker-end="url(#arrow)" />
+
+          <!-- Pipe Junction Connection Nodes (Small Circles) -->
+          <circle cx="670" cy="435" r="3" class="cad-line" fill="#38bdf8" />
+          <circle cx="480" cy="435" r="3" class="cad-line" fill="#38bdf8" />
+          <circle cx="520" cy="425" r="3" class="cad-line" fill="#f59e0b" />
+          <circle cx="820" cy="250" r="3" class="cad-line" fill="#38bdf8" />
+        </g>
+
+        <!-- ================= LAYER 8: SITE ENTRANCE & ANNOTATIONS ================= -->
+        <g id="layerAnnotations">
+          <!-- TESİS GİRİŞİ (Main Facility Entrance - Right Edge) -->
+          <g id="gateEntrance" class="cad-element">
+            <line x1="1030" y1="620" x2="1030" y2="680" stroke="#f59e0b" stroke-width="4" stroke-dasharray="6,4" />
+            <path d="M 1060 650 L 1035 650" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow)" />
+            <rect x="1050" y="638" width="110" height="24" rx="4" fill="#0a192f" stroke="#f59e0b" stroke-width="1" />
+            <text x="1105" y="654" text-anchor="middle" class="cad-text" fill="#f59e0b">TESİS GİRİŞİ</text>
+          </g>
+
+          <!-- Detail Nodes Callouts (Detay 1-7 Nodes) -->
+          <g class="cad-subtext" font-size="8">
+            <!-- Detay 1 -->
+            <circle cx="600" cy="490" r="6" class="cad-dash" />
+            <text x="600" y="478" text-anchor="middle">DETAY-1</text>
+
+            <!-- Detay 2 -->
+            <circle cx="430" cy="510" r="6" class="cad-dash" />
+            <text x="400" y="505" text-anchor="middle">DETAY-2</text>
+
+            <!-- Detay 4 -->
+            <circle cx="680" cy="470" r="6" class="cad-dash" />
+            <text x="710" y="470" text-anchor="middle">DETAY-4</text>
+
+            <!-- Detay 5 -->
+            <circle cx="625" cy="540" r="6" class="cad-dash" />
+            <text x="625" y="528" text-anchor="middle">DETAY-5</text>
+          </g>
+        </g>
+
+        <!-- ================= LAYER 9: TITLE BLOCK & BLUEPRINT LEGEND ================= -->
+        <!-- Architectural Standard Title Block (Bottom Left Corner) -->
+        <g id="titleBlock" transform="translate(90, 50)">
+          <rect x="0" y="0" width="280" height="110" fill="#0a192f" stroke="#38bdf8" stroke-width="1.5" />
+          <line x1="0" y1="30" x2="280" y2="30" stroke="#38bdf8" stroke-width="1" />
+          <line x1="0" y1="70" x2="280" y2="70" stroke="#38bdf8" stroke-width="1" />
+          <line x1="180" y1="30" x2="180" y2="110" stroke="#38bdf8" stroke-width="1" />
+
+          <!-- Title Text -->
+          <text x="140" y="20" text-anchor="middle" class="cad-text" font-size="12" fill="#38bdf8">BİYOGAZ TESİSİ YERLEŞİM KROKİSİ</text>
+          
+          <text x="2" y="46" class="cad-subtext" font-size="9">PROJE: Biyogaz Enj. Üret. Santr.</text>
+          <text x="2" y="60" class="cad-subtext" font-size="9">ÇİZİM: Mimari&Proses Teknik Şema</text>
+          
+          <text x="2" y="86" class="cad-subtext" font-size="8">ÖLÇEK: ÖLÇÜSÜZ (KROKİ)</text>
+          <text x="2" y="100" class="cad-subtext" font-size="8">TARIH: Ekim 2026</text>
+
+          <text x="190" y="46" class="cad-subtext" font-size="8">REVİZYON: R-02</text>
+          <text x="190" y="60" class="cad-subtext" font-size="8">DURUM: ONAYLI</text>
+          <text x="190" y="95" class="cad-text" font-size="10" fill="#10b981">VEKTÖREL</text>
+        </g>
+
+        <!-- Architectural Legend (Lejant) Block (Top Right Corner) -->
+        <g id="legendBlock" transform="translate(770, 70)">
+          <rect x="0" y="0" width="230" height="155" fill="#0a192f" stroke="#38bdf8" stroke-width="1" opacity="0.95" />
+          <rect x="0" y="0" width="230" height="22" fill="#13305a" />
+          <text x="115" y="15" text-anchor="middle" class="cad-text" font-size="10" fill="#38bdf8">LEJANT / SEMBOLLER</text>
+
+          <!-- Item 1: Main Tanks -->
+          <circle cx="20" cy="38" r="8" class="cad-line" />
+          <text x="40" y="41" class="cad-subtext" font-size="9">Proses Tankları (V-101, 102, 103)</text>
+
+          <!-- Item 2: Main Piping -->
+          <line x1="10" y1="60" x2="30" y2="60" class="pipe-line" />
+          <text x="40" y="63" class="cad-subtext" font-size="9">Ana Biyogaz / Çamur Boru Hattı</text>
+
+          <!-- Item 3: Emergency Line -->
+          <line x1="10" y1="80" x2="30" y2="80" class="pipe-secondary" />
+          <text x="40" y="83" class="cad-subtext" font-size="9">Acil Durum Gaz Baza Hattı</text>
+
+          <!-- Item 4: Auxiliary Buildings -->
+          <rect x="12" y="96" width="16" height="12" class="cad-line" fill="#13305a" />
+          <text x="40" y="105" class="cad-subtext" font-size="9">Kojenerasyon / Trafo / Binalar</text>
+
+          <!-- Item 5: Facility Perimeter -->
+          <line x1="10" y1="126" x2="30" y2="126" class="boundary-line" />
+          <text x="40" y="129" class="cad-subtext" font-size="9">Tesis Çevre Tel Çit Sınırı</text>
+
+          <!-- Item 6: Flare Stack -->
+          <circle cx="20" cy="144" r="5" class="cad-thick" />
+          <text x="40" y="147" class="cad-subtext" font-size="9">Emniyet Bacası Güvenlik Alanı</text>
+        </g>
+
+      </svg>
+    </div>
+
+    <!-- Floating Quick Info Toast / Legend Note -->
+    <div class="mobile-info-note no-print fixed bottom-4 left-4 bg-slate-900/90 backdrop-blur border border-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg shadow-lg flex items-center gap-3">
+      <div class="flex items-center gap-1.5 text-sky-400 font-medium">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Vektörel Çizim:</span>
+      </div>
+      <span>Vektörel Şema</span>
+    </div>
+  </main>
+  
+  <div class="mobile-signature no-print fixed bottom-4 right-4 z-50
+            flex items-center gap-2
+            rounded-lg border border-sky-400/30
+            bg-slate-950/80 px-4 py-2
+            shadow-lg shadow-sky-500/10
+            backdrop-blur-sm pointer-events-none">
+
+    <span class="h-7 w-1 rounded-full bg-sky-400"></span>
+
+    <div class="flex flex-col">
+        <span class="text-[9px] tracking-[2px] text-sky-300/70">
+            Beyza Üstünsoy
+        </span>
+        <span class="text-[9px] tracking-[2px] text-white">
+			Yük Çevre Müh
+		</span>
+    </div>
+</div>
+
+  <!-- Interactive Logic & Theme Scripting -->
+ <script>
+    let isBlueprintMode = true;
+    let labelsVisible = true;
+
+    // Toggle Theme (Blueprint Navy vs. High-Contrast White Light Mode)
+    function toggleTheme() {
+      const container = document.getElementById('canvasContainer');
+      const themeStyles = document.getElementById('svgThemeStyles');
+      const themeLabel = document.getElementById('themeLabel');
+      const themeIcon = document.getElementById('themeIcon');
+
+      isBlueprintMode = !isBlueprintMode;
+
+      if (isBlueprintMode) {
+        // Blueprint Navy Mode
+        container.classList.remove('blueprint-light-bg');
+        container.classList.add('blueprint-bg');
+        
+        themeLabel.innerText = "Mavi Baskı Mode";
+        themeIcon.className = "fa-solid fa-palette text-sky-400";
+
+        themeStyles.innerHTML = `
+          .cad-line { stroke: #f8fafc; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+          .cad-thick { stroke: #ffffff; stroke-width: 2.5; fill: none; }
+          .cad-thin { stroke: #94a3b8; stroke-width: 1; fill: none; }
+          .cad-dash { stroke: #38bdf8; stroke-width: 1.2; stroke-dasharray: 5,4; fill: none; }
+          .pipe-line { stroke: #38bdf8; stroke-width: 2.2; fill: none; }
+          .pipe-secondary { stroke: #f59e0b; stroke-width: 1.8; stroke-dasharray: 4,3; fill: none; }
+          .cad-text { fill: #ffffff; font-family: 'Roboto Mono', monospace; font-size: 11px; font-weight: 600; }
+          .cad-subtext { fill: #94a3b8; font-family: 'Roboto Mono', monospace; font-size: 9px; }
+          .boundary-line { stroke: #38bdf8; stroke-width: 2; stroke-dasharray: 8,4,2,4; fill: none; }
+          .tank-fill { fill: #0e2a4a; fill-opacity: 0.6; }
+          .building-fill { fill: #13305a; fill-opacity: 0.8; }
+        `;
+      } else {
+        // High-Contrast White CAD Mode
+        container.classList.remove('blueprint-bg');
+        container.classList.add('blueprint-light-bg');
+
+        themeLabel.innerText = "Siyah-Beyaz Mode";
+        themeIcon.className = "fa-solid fa-sun text-amber-400";
+
+        themeStyles.innerHTML = `
+          .cad-line { stroke: #0f172a; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+          .cad-thick { stroke: #020617; stroke-width: 2.5; fill: none; }
+          .cad-thin { stroke: #64748b; stroke-width: 1; fill: none; }
+          .cad-dash { stroke: #0284c7; stroke-width: 1.2; stroke-dasharray: 5,4; fill: none; }
+          .pipe-line { stroke: #0284c7; stroke-width: 2.2; fill: none; }
+          .pipe-secondary { stroke: #d97706; stroke-width: 1.8; stroke-dasharray: 4,3; fill: none; }
+          .cad-text { fill: #0f172a; font-family: 'Roboto Mono', monospace; font-size: 11px; font-weight: 700; }
+          .cad-subtext { fill: #334155; font-family: 'Roboto Mono', monospace; font-size: 9px; font-weight: 500; }
+          .boundary-line { stroke: #0284c7; stroke-width: 2; stroke-dasharray: 8,4,2,4; fill: none; }
+          .tank-fill { fill: #e2e8f0; fill-opacity: 0.7; }
+          .building-fill { fill: #cbd5e1; fill-opacity: 0.9; }
+		  .label-group rect {
+			  fill: #ffffff !important;
+			  stroke: #000000 !important;
+			}
+
+			.label-group line {
+			  stroke: #000000 !important;
+			}
+
+			.label-group text {
+			  fill: #000000 !important;
+			}
+			#titleBlock > rect,
+			#legendBlock > rect {
+			  fill: #ffffff !important;
+			  stroke: #000000 !important;
+			}
+
+			#titleBlock line,
+			#legendBlock line {
+			  stroke: #000000 !important;
+			}
+
+			#titleBlock text,
+			#legendBlock text {
+			  fill: #000000 !important;
+			}
+			#gateEntrance rect {
+			  fill: #ffffff !important;
+			  stroke: #000000 !important;
+			}
+
+			#gateEntrance text {
+			  fill: #000000 !important;
+			}
+
+			#gateEntrance line,
+			#gateEntrance path {
+			  stroke: #000000 !important;
+			}
+			#flareBlock rect[fill="#0a192f"] {
+			  fill: #ffffff !important;
+			  stroke: #000000 !important;
+			}
+
+			#flareBlock text {
+			  fill: #000000 !important;
+			}
+        `;
+      }
+    }
+
+    // Toggle Text Visibility
+    function toggleLabels() {
+      const labelsLabel = document.getElementById('labelsLabel');
+      const textElements = document.querySelectorAll('#blueprintSvg text, .label-group');
+
+      labelsVisible = !labelsVisible;
+
+      textElements.forEach(el => {
+        el.style.display = labelsVisible ? 'block' : 'none';
+      });
+
+      labelsLabel.innerText = labelsVisible ? "Yazılar: Açık" : "Yazılar: Kapalı";
+    }
+
+    // PDF Export / Print Sorununu Çözen Güncellenmiş Fonksiyon
+    function triggerPrint() {
+      // Sayfadaki gereksiz arayüz elementlerini (butonları) geçici olarak gizleyip tam ekran vektörel çıktı sağlar
+      window.focus();
+      setTimeout(() => {
+        window.print();
+      }, 200);
+    }
+	
+	
+	
+	
+	const canvasContainer = document.getElementById('canvasContainer');
+
+// Zoom Kontrolü
+let zoomSeviyesi = 1;
+const zoomAdimi = 0.2;
+const zoomMin = 1;
+const zoomMax = 4;
+let baslangicGenislik = 0;
+let baslangicYukseklik = 0;
+
+function zoomUygula(eskiZoom = zoomSeviyesi) {
+    const alan = document.getElementById('printableArea');
+    const gosterge = document.getElementById('zoomVal');
+
+    if (!alan || !canvasContainer) return;
+
+    // Başlangıç boyutlarını yalnızca bir kez al
+    if (!baslangicGenislik || !baslangicYukseklik) {
+        baslangicGenislik = alan.clientWidth;
+        baslangicYukseklik = alan.clientHeight;
+    }
+
+    // Görünüm merkezini koru
+    const merkezX = canvasContainer.scrollLeft + canvasContainer.clientWidth / 2;
+    const merkezY = canvasContainer.scrollTop + canvasContainer.clientHeight / 2;
+    const oranX = merkezX / (baslangicGenislik * eskiZoom);
+    const oranY = merkezY / (baslangicYukseklik * eskiZoom);
+
+    // Çizim alanını fiziksel olarak büyüt; kaydırma çubukları oluşsun
+    alan.style.maxWidth = 'none';
+    alan.style.maxHeight = 'none';
+    alan.style.width = (baslangicGenislik * zoomSeviyesi) + 'px';
+    alan.style.height = (baslangicYukseklik * zoomSeviyesi) + 'px';
+    alan.style.flexShrink = '0';
+    alan.style.transform = 'none';
+
+    // Aynı çizim noktasını ekranın merkezinde tut
+    canvasContainer.scrollLeft =
+        Math.max(0, oranX * baslangicGenislik * zoomSeviyesi - canvasContainer.clientWidth / 2);
+    canvasContainer.scrollTop =
+        Math.max(0, oranY * baslangicYukseklik * zoomSeviyesi - canvasContainer.clientHeight / 2);
+
+    if (gosterge) {
+        gosterge.textContent = Math.round(zoomSeviyesi * 100) + '%';
+    }
+}
+
+function zoomIn() {
+    const eskiZoom = zoomSeviyesi;
+    zoomSeviyesi = Math.min(zoomMax, zoomSeviyesi + zoomAdimi);
+    zoomUygula(eskiZoom);
+}
+
+function zoomOut() {
+    const eskiZoom = zoomSeviyesi;
+    zoomSeviyesi = Math.max(zoomMin, zoomSeviyesi - zoomAdimi);
+    zoomUygula(eskiZoom);
+}
+
+function resetZoom() {
+    const alan = document.getElementById('printableArea');
+
+    zoomSeviyesi = 1;
+    baslangicGenislik = 0;
+    baslangicYukseklik = 0;
+
+    if (alan) {
+        alan.style.width = '';
+        alan.style.height = '';
+        alan.style.maxWidth = '';
+        alan.style.maxHeight = '';
+        alan.style.flexShrink = '';
+        alan.style.transform = '';
+    }
+
+    if (canvasContainer) {
+        canvasContainer.scrollTop = 0;
+        canvasContainer.scrollLeft = 0;
+    }
+
+    const gosterge = document.getElementById('zoomVal');
+    if (gosterge) gosterge.textContent = '100%';
+}
+
+// Mouse tekerleğiyle yakınlaştırma / uzaklaştırma
+canvasContainer.addEventListener('wheel', function(e) {
+    e.preventDefault();
+
+    if (e.deltaY < 0) {
+        zoomIn();
+    } else if (e.deltaY > 0) {
+        zoomOut();
+    }
+}, { passive: false });
+
+	
+
+  </script>
+</body>
+</html>
