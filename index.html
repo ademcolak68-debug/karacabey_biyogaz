@@ -26,37 +26,46 @@ body {
 }
 
 /* ==========================================
-   ÖZEL DÜŞEY KAYDIRMA ÇUBUĞU (CUSTOM SCROLLBAR)
+   ÖZEL DÜŞEY KAYDIRMA ÇUBUĞU (GÜNCELLENMİŞ)
    ========================================== */
 
-/* Webkit tabanlı tarayıcılar (Chrome, Edge, Safari) için genişlik */
+/* Webkit tabanlı tarayıcılar (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 12px; /* Mobilde ve masada daha rahat tutulabilmesi için genişliği biraz artırdık */
 }
 
-/* Kaydırma çubuğunun arka plan rayı (track) */
 ::-webkit-scrollbar-track {
   background: #f2f5f7;
-  border-radius: 5px;
+  border-radius: 0; /* Kenarlara yapışmasını ve kaybolmamasını sağlar */
 }
 
-/* Kaydırma çubuğunun tutacağı (thumb) */
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 5px;
-  border: 2px solid #f2f5f7; /* Çubuğun etrafında zarif bir boşluk efekti verir */
-  transition: background 0.2s ease;
+  background: #94a3b8; /* Normalde de daha belirgin bir gri ton */
+  border-radius: 6px;
+  border: 2px solid #f2f5f7;
 }
 
-/* Kaydırma çubuğunun üzerine gelindiğinde (hover) veya tutulduğunda */
 ::-webkit-scrollbar-thumb:hover {
   background: #13795b; /* Tesisin ana yeşil rengi */
 }
 
-/* Firefox tarayıcısı için kaydırma çubuğu desteği */
+/* 768px ve altı ekranlar için özel güvenlik önlemi (Kaybolmayı önler) */
+@media screen and (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 10px; /* Mobilde aşırı inceleyip kaybolmasını engeller */
+  }
+  
+  /* Sayfa gövdesinin sağa taşmasını veya scrollbar'ın tıklnamaz olmasını önler */
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+}
+
+/* Firefox için uyumluluk */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f2f5f7;
+  scrollbar-width: auto; /* Firefox'un otomatik daraltıp gizlemesini engeller, standart boyutta tutar */
+  scrollbar-color: #94a3b8 #f2f5f7;
 }
 
 /* ==========================================
