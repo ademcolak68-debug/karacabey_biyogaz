@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Karacabey Biyogaz Enerji Üretim</title>
+
+<!-- Mapbox GL JS Kütüphane Stil Dosyası -->
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+<!-- Endüstriyel İkonlar İçin FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* ==========================================
+   1. GENEL RESET VE TAHOMA FONT AYARLARI
+   ========================================== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Tahoma, sans-serif;
+  background: #f2f5f7;
+  color: #1e293b;
+}
+
+/* ==========================================
+   ÖZEL DÜŞEY KAYDIRMA ÇUBUĞU (CUSTOM SCROLLBAR)
+   ========================================== */
+
+/* Webkit tabanlı tarayıcılar (Chrome, Edge, Safari) için genişlik */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Kaydırma çubuğunun arka plan rayı (track) */
+::-webkit-scrollbar-track {
+  background: #f2f5f7;
+  border-radius: 5px;
+}
+
+/* Kaydırma çubuğunun tutacağı (thumb) */
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 5px;
+  border: 2px solid #f2f5f7; /* Çubuğun etrafında zarif bir boşluk efekti verir */
+  transition: background 0.2s ease;
+}
+
+/* Kaydırma çubuğunun üzerine gelindiğinde (hover) veya tutulduğunda */
+::-webkit-scrollbar-thumb:hover {
+  background: #13795b; /* Tesisin ana yeşil rengi */
+}
+
+/* Firefox tarayıcısı için kaydırma çubuğu desteği */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f2f5f7;
+}
+
+/* ==========================================
+   2. ÜST BİLGİ ALANI (HEADER) - ORTALANMIŞ
+   ========================================== */
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 16px 20px;
+  background: #123b32;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+.top h1 {
+  font-size: 21px;
+  margin: 0 0 5px;
+}
+
+.top p {
+  margin: 0;
+  font-size: 13px;
+  opacity: .88;
+}
+
+/* ==========================================
+   3. ANA İÇERİK VE PANEL YERLEŞİMİ
+   ========================================== */
+.wrap {
+  max-width: 1200px;
+  margin: 16px auto;
+  padding: 0 14px;
+}
+
+.panel {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 14px #10203012;
+  overflow: hidden;
+}
+
+#map {
+  height: 62vh;
+  min-height: 390px;
+  width: 100%;
+}
+
+/* ==========================================
+   4. KONTROL BUTONLARI VE ETKİLEŞİM ELEMANLARI
+   ========================================== */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  padding: 13px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-weight: normal;
+  cursor: pointer;
+  font-family: Tahoma, sans-serif;
+  background: #e2e8f0;
+  color: #1e293b;
+  transition: all 0.2s;
+}
+
+button.primary {
+  background: #13795b;
+  color: #fff;
+}
+
+button:hover {
+  filter: brightness(.96);
+}
+
+button.active {
+  background: #13795b;
+  color: #fff;
+}
+
+/* Karacabey Merkez Butonu Özel Renk Tonu */
+#routeKaracabeyBtn {
+  background: #2b6cb0;
+  color: #fff;
+}
+
+/* ==========================================
+   5. İSTATİSTİK VE BİLGİ PANELLERİ
+   ========================================== */
+.stats-container {
+  padding: 15px;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 12px;
+}
+
+.stat small {
+  display: block;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+
+.stat strong {
+  font-size: 17px;
+}
+
+.bottom-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.note {
+  padding: 0 14px 14px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ==========================================
+   6. HARİTA POPUP VE ÖZEL İKON STİLLERİ
+   ========================================== */
+.mapboxgl-popup-content {
+  line-height: 1.55;
+  font-family: Tahoma, sans-serif;
+  padding: 12px 15px;
+}
+
+/* Tesis Başlangıç Konumu Özel Endüstriyel İkon */
+.custom-facility-marker {
+  background-color: #13795b;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  border: 2px solid #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Butonlara tıklandığında (focus) etrafında oluşan kalın çerçeveyi kaldırır */
+button:focus {
+  outline: none;
+}
+
+/* Tesis Popup İçindeki Detay Buton/Link Stili */
+.popup-detail-link {
+  display: block;              /* Blok yaparak tüm satırı kaplamasını ve ortalanmasını sağlar */
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background-color: #f1f5f9;   /* Yumuşak bir zemin rengi */
+  color: #13795b;
+  font-weight: bold;
+  text-align: center;          /* Yazıyı ortalar */
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+/* Detay linkinin üzerine gelince (hover) zemin rengi ve metin rengi değişimi */
+.popup-detail-link:hover {
+  background-color: #13795b;   /* Tesisin ana yeşil rengi */
+  color: #ffffff;              /* Yazı rengi beyaz olur */
+}
+
+/* Popup içerisindeki detay linkine tıklandığında oluşan odak çerçevesini tamamen kaldırır */
+.popup-detail-link:focus,
+.popup-detail-link:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Mapbox popup içeriğinin genelinde oluşabilecek odak çizgilerini engeller */
+.mapboxgl-popup a:focus {
+  outline: none !important;
+}
+
+
+/* Harita Üstü Şık Home Butonu Stili */
+.map-home-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  background-color: #ffffff;
+  color: #123b32;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.map-home-btn:hover {
+  background-color: #f2f5f7;
+  color: #13795b;
+}
+
+.map-home-btn:focus,
+.map-home-btn:active {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.1) !important;
+}
+
+/* ==========================================
+   TABLET VE TELEFONLAR İÇİN KÜÇÜLTME (PX AYARLARI)
+   ========================================== */
+
+/* Tabletler İçin (768px ve altı) */
+@media screen and (max-width: 768px) {
+  .top h1 {
+    font-size: 18px; /* Başlık küçülür */
+  }
+  .top p {
+    font-size: 12px;
+  }
+  button {
+    padding: 8px 11px;
+    font-size: 13px; /* Butonlar ve yazıları küçülür */
+  }
+  .stat strong {
+    font-size: 15px; /* İstatistik rakamları küçülür */
+  }
+}
+
+/* Telefonlar İçin (480px ve altı) */
+@media screen and (max-width: 480px) {
+  .top {
+    padding: 12px 14px;
+  }
+  .top h1 {
+    font-size: 16px; /* Telefonda ana başlık daha da ideal boyuta gelir */
+  }
+  .top h1 span {
+    font-size: 13px !important;
+  }
+  .top p {
+    font-size: 11px;
+  }
+  button {
+    padding: 7px 10px;
+    font-size: 12px; /* Telefonda butonlar kibarlaşır ve küçülür */
+  }
+  .stat {
+    padding: 9px;
+  }
+  .stat small {
+    font-size: 11px;
+  }
+  .stat strong {
+    font-size: 14px;
+  }
+  .note {
+    font-size: 10px;
+  }
+}
+
+
+
+/* Tesis Detayı Butonu - Diğerlerinden Farklı Zemin ve Hover Tasarımı */
+.detail-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-weight: normal;
+  cursor: pointer;
+  font-family: Tahoma, sans-serif;
+  background: #e6f4ea;          /* Çok hafif, ferah yeşil bir zemin */
+  color: #13795b;               /* Koyu yeşil yazı rengi */
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.detail-btn:hover {
+  background: #13795b;          /* Üzerine gelince zemin tam yeşil olur */
+  color: #ffffff;               /* Yazı beyaz olur */
+  border-color: #13795b;
+  filter: none;
+}
+
+.detail-btn:focus,
+.detail-btn:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Küçük ekran uyumu */
+@media screen and (max-width: 768px) {
+  .detail-btn {
+    padding: 8px 11px;
+    font-size: 13px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .detail-btn {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+}
+
+
+
+
+</style>
+</head>
+<body>
+
+<!-- ÜST BAŞLIK BÖLÜMÜ -->
+<header class="top">
+  <h1>Karacabey biyogaz enerji üretim <span style="font-size: 16px; font-weight: normal; opacity: 0.9; margin-left: 10px;">(Kurulu Güç: 100 kW)</span></h1>
+  <p>Tesis konumu · Güzergâh seçenekleri · Yol mesafesi ve tahmini süre</p>
+</header>
+
+<main class="wrap">
+  <section class="panel">
+    
+   
+    <!-- HARİTA KATMAN VE TEMİZLEME KONTROLLERİ -->
+	<div class="controls">
+	  <button id="osmBtn" class="active">Standart harita</button>
+	  <button id="satBtn">Google Uydu/Trafik</button>
+	  <button id="clearBtn">Güzergâhı temizle</button>
+	  <!-- Yeni Tesis Detayı Butonu -->
+	  <a href="biyogaz_tesisi.html" target="_blank" class="detail-btn" id="facilityDetailBtn">
+		<i class="fa-solid fa-circle-info"></i> Tesis detayı
+	  </a>
+	</div>
+    
+    <div style="position: relative;">
+	  <!-- Harita Alanı -->
+	  <div id="map"></div>
+	  
+	  <!-- Harita Üstü Şık Home Butonu -->
+	  <button id="homeBtn" class="map-home-btn" title="Başlangıç Konumuna Dön">
+		<i class="fa-solid fa-house"></i>
+	  </button>
+	</div>
+
+    <!-- İSTATİSTİK VE GÜZERGÂH ÇİZME BUTONLARI -->
+    <div class="stats-container">
+      <div class="stats">
+        <div class="stat"><small>Güzergâh mesafesi</small><strong id="distance">Henüz hesaplanmadı</strong></div>
+        <div class="stat"><small>Tahmini sürüş süresi</small><strong id="duration">—</strong></div>
+        <div class="stat"><small>Güzergâh durumu</small><strong id="status">Hazır</strong></div>
+      </div>
+      <div class="bottom-row">
+        <div class="btn-group" style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
+          <button class="primary" id="routeFormeksBtn">Tesis → Formeks Güzergâhını Çiz</button>
+          <button id="routeKaracabeyBtn">Tesis → Karacabey Merkez Güzergâhını Çiz</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      Harita ve yol güzergâhı internet bağlantısı gerektirir. Uydu katmanı Google Maps üzerinden alınmaktadır; yol güzergâhı OSRM açık yönlendirme servisiyle hesaplanır.
+    </div>
+  </section>
+</main>
+
+<!-- Mapbox GL JS Kütüphanesi -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VvZ3JhcGh5cHJvZiIsImEiOiJjanYxb2t1ZG8wNGU1NGFsNXVkcnhzNmFpIn0.M3qCJK8FYa06B-Irc6FD-g';
+
+/* ==========================================
+   1. KOORDİNATLAR VE HARİTA BAŞLANGICI
+   ========================================== */
+const facility = [28.330532, 40.125583]; // Karacabey Biyogaz Tesisi
+const formeks = [28.170939, 40.202875];   // Formeks Hedef Konumu
+const karacabeyMerkez = [28.358996, 40.216032]; // Karacabey İlçe Merkezi
+
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/streets-v12',
+  center: facility,
+  zoom: 11
+});
+
+map.addControl(new mapboxgl.NavigationControl());
+map.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }));
+
+/* ==========================================
+   2. TESİS (BAŞLANGIÇ) MARKER TANIMLAMASI
+   ========================================== */
+const el = document.createElement('div');
+el.className = 'custom-facility-marker';
+el.innerHTML = '<i class="fa-solid fa-industry"></i>';
+
+
+// Tesis Başlangıç Konumu Popup ve Marker Tanımlaması
+const facilityPopup = new mapboxgl.Popup({ offset: 25, closeButton: false, closeOnClick: false })
+  .setHTML('<b>Karacabey Biyogaz Tesisi</b>');
+
+const facilityMarker = new mapboxgl.Marker(el)
+  .setLngLat(facility)
+  .setPopup(facilityPopup)
+  .addTo(map);
+
+/* ==========================================
+   3. HEDEF MARKER ÜRETİCİ YARDIMCI FONKSİYON
+   ========================================== */
+function createDestinationMarker(coords, title, subtitle, color, scale = 0.6) {
+  const popup = new mapboxgl.Popup({ offset: 25, closeButton: false, closeOnClick: false })
+    .setHTML(`<b>${title}</b><br>${subtitle}`);
+
+  const marker = new mapboxgl.Marker({ color: color, scale: scale })
+    .setLngLat(coords)
+    .setPopup(popup);
+
+  return { marker, popup };
+}
+
+// Formeks ve Karacabey Merkez Hedef Tanımları
+const formeksDest = createDestinationMarker(formeks, 'Formeks', 'Hedef konum', '#e3342f');
+const formeksMarker = formeksDest.marker;
+const formeksPopup = formeksDest.popup;
+
+const karacabeyDest = createDestinationMarker(karacabeyMerkez, 'Karacabey Merkez', 'İlçe Merkezi', '#3182ce');
+const karacabeyMarker = karacabeyDest.marker;
+const karacabeyPopup = karacabeyDest.popup;
+
+const $ = id => document.getElementById(id);
+
+/* ==========================================
+   4. HARİTA KATMANLARI (GOOGLE UYDU / STANDART)
+   ========================================== */
+map.on('load', () => {
+  map.addSource('google-tiles', {
+    type: 'raster',
+    tiles: ['https://mt1.google.com/vt/lyrs=s,h,traffic&x={x}&y={y}&z={z}'],
+    tileSize: 256,
+    maxzoom: 24
+  });
+
+  map.addLayer({
+    id: 'google-tiles-layer',
+    type: 'raster',
+    source: 'google-tiles',
+    minzoom: 0,
+    maxzoom: 24,
+    layout: { 'visibility': 'none' }
+  });
+});
+
+$('satBtn').onclick = () => {
+  if (map.getLayer('google-tiles-layer')) {
+    map.setLayoutProperty('google-tiles-layer', 'visibility', 'visible');
+    $('satBtn').classList.add('active');
+    $('osmBtn').classList.remove('active');
+  }
+};
+
+$('osmBtn').onclick = () => {
+  if (map.getLayer('google-tiles-layer')) {
+    map.setLayoutProperty('google-tiles-layer', 'visibility', 'none');
+    $('osmBtn').classList.add('active');
+    $('satBtn').classList.remove('active');
+  }
+};
+
+/* ==========================================
+   5. GÜZERGÂH TEMİZLEME FONKSİYONU
+   ========================================== */
+$('clearBtn').onclick = () => {
+  if (map.getLayer('route')) {
+    map.removeLayer('route');
+    map.removeSource('route');
+  }
+  formeksMarker.remove();
+  karacabeyMarker.remove();
+  
+  if (facilityPopup.isOpen()) facilityPopup.remove();
+  if (formeksPopup.isOpen()) formeksPopup.remove();
+  if (karacabeyPopup.isOpen()) karacabeyPopup.remove();
+
+  $('distance').textContent = 'Henüz hesaplanmadı';
+  $('duration').textContent = '—';
+  $('status').textContent = 'Hazır';
+};
+
+/* ==========================================
+   6. OSRM İLE ROTA ÇİZME VE HESAPLAMA FONKSİYONU
+   ========================================== */
+async function drawRoute(targetCoords, targetMarker, targetPopup, btnId) {
+  const btn = $(btnId);
+  $('status').textContent = 'Güzergâh hesaplanıyor…';
+  btn.disabled = true;
+
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${facility[0]},${facility[1]};${targetCoords[0]},${targetCoords[1]}?overview=full&geometries=geojson`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('Yol servisine ulaşılamadı');
+    
+    const data = await r.json();
+    if (data.code !== 'Ok' || !data.routes?.length) throw new Error('Güzergâh bulunamadı');
+
+    const route = data.routes[0];
+
+    // Önceki rotaları ve marker'ları temizle
+    if (map.getLayer('route')) {
+      map.removeLayer('route');
+      map.removeSource('route');
+    }
+    formeksMarker.remove();
+    karacabeyMarker.remove();
+    if (formeksPopup.isOpen()) formeksPopup.remove();
+    if (karacabeyPopup.isOpen()) karacabeyPopup.remove();
+
+    // Rotayı Haritaya Ekle
+    map.addSource('route', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: {},
+        geometry: route.geometry
+      }
+    });
+
+    map.addLayer({
+      id: 'route',
+      type: 'line',
+      source: 'route',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': btnId === 'routeFormeksBtn' ? '#e3342f' : '#3182ce',
+        'line-width': 6,
+        'line-opacity': 0.85
+      }
+    });
+
+    // Harita Görünümünü Rotaya Göre Odakla
+    const coordinates = route.geometry.coordinates;
+    const bounds = coordinates.reduce((b, coord) => b.extend(coord), new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+    map.fitBounds(bounds, { padding: 50 });
+
+    // İstatistik Verilerini Güncelle
+    $('distance').textContent = (route.distance / 1000).toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' km';
+    $('duration').textContent = Math.round(route.duration / 60) + ' dakika';
+    $('status').textContent = 'Güzergâh hazır';
+    
+    // Hedef Marker ve Popup'ları Aç
+    targetMarker.addTo(map);
+    facilityPopup.addTo(map);
+    targetPopup.addTo(map);
+
+  } catch (e) {
+    $('status').textContent = 'Hesaplanmadı';
+    $('distance').textContent = 'Servis bağlantısını kontrol edin';
+    $('duration').textContent = '—';
+    alert('Güzergâh oluşturulamadı. İnternet bağlantısını kontrol edip yeniden deneyin.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ==========================================
+   7. BUTON OLAY BAĞLANTILARI (EVENTS)
+   ========================================== */
+$('routeFormeksBtn').onclick = () => drawRoute(formeks, formeksMarker, formeksPopup, 'routeFormeksBtn');
+$('routeKaracabeyBtn').onclick = () => drawRoute(karacabeyMerkez, karacabeyMarker, karacabeyPopup, 'routeKaracabeyBtn');
+
+
+/* ==========================================
+   BAŞLANGIÇ KONUMUNA DÖNÜŞ (HOME BUTTON)
+   ========================================== */
+$('homeBtn').onclick = () => {
+  map.flyTo({
+    center: facility, // Başlangıç tesis koordinatı
+    zoom: 11,          // Başlangıç zoom seviyesi
+    essential: true    // Animasyon önceliği
+  });
+};
+
+
+</script>
+
+</body>
+</html>
