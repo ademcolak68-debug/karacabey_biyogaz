@@ -49,10 +49,10 @@ body {
   background: #13795b; /* Tesisin ana yeşil rengi */
 }
 
-/* 480px ve altı ekranlar için özel güvenlik önlemi (Kaybolmayı önler) */
+/* 768px ve altı ekranlar için özel güvenlik önlemi (Kaybolmayı önler) */
 @media screen and (max-width: 480px) {
   ::-webkit-scrollbar {
-    width: 12px; /* Mobilde aşırı inceleyip kaybolmasını engeller */
+    width: 10px; /* Mobilde aşırı inceleyip kaybolmasını engeller */
   }
   
   /* Sayfa gövdesinin sağa taşmasını veya scrollbar'ın tıklnamaz olmasını önler */
@@ -338,7 +338,7 @@ button:focus {
     font-size: 11px;
   }
   button {
-    padding: 15px 12px;
+    padding: 7px 10px;
     font-size: 12px; /* Telefonda butonlar kibarlaşır ve küçülür */
   }
   .stat {
@@ -353,7 +353,7 @@ button:focus {
   .note {
     font-size: 10px;
   }
-.controls {
+  .controls {
     display: grid;
     grid-template-columns: 1fr 1fr; /* Tam olarak 2 eşit sütuna böler */
     gap: 8px;
@@ -365,11 +365,45 @@ button:focus {
   .controls .detail-btn {
     width: 100%;
     min-width: 0;
-    padding: 15px 14px;
+    padding: 9px 6px;
     font-size: 11.5px;
     justify-content: center;
   }
 }
+
+/* Telefon ekranlarında harita ve güzergâh alanı */
+@media screen and (max-width: 480px) {
+  #map {
+    height: 38vh;
+    min-height: 250px;
+    max-height: 320px;
+  }
+
+  .stats-container {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat {
+    padding: 9px;
+  }
+
+  .stat:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .btn-group button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+
 
 
 
@@ -419,7 +453,84 @@ button:focus {
   }
 }
 
+/* Anlık konum butonu */
+.map-location-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  color: #13795b;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  font-size: 17px;
+}
 
+.map-location-btn:hover {
+  background: #e6f4ea;
+}
+
+
+/* Şık tesis adı */
+.facility-intro-label {
+  position: absolute;
+  left: 50%;
+  bottom: 46px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+
+  background: transparent;
+  border: none;
+  padding: 0;
+
+  font-family: Tahoma, sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+
+  background-image: linear-gradient(
+    90deg,
+    #13795b 0%,
+    #168aad 45%,
+    #e09f3e 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  -webkit-text-stroke: 0.25px rgba(255,255,255,0.8);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
+
+  pointer-events: none;
+  opacity: 0;
+  animation: facilityIntro 8s ease-in-out 0.2s forwards;
+}
+
+@keyframes facilityIntro {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  65% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -4px);
+  }
+}
 
 
 </style>
@@ -455,6 +566,12 @@ button:focus {
 	  <button id="homeBtn" class="map-home-btn" title="Başlangıç Konumuna Dön">
 		<i class="fa-solid fa-house"></i>
 	  </button>
+	  
+	<button id="locationBtn"
+		class="map-location-btn"
+		title="Anlık konumumu bul">
+	  <i class="fa-solid fa-location-crosshairs"></i>
+	</button>
 	</div>
 
     <!-- İSTATİSTİK VE GÜZERGÂH ÇİZME BUTONLARI -->
@@ -497,7 +614,7 @@ const map = new mapboxgl.Map({
   zoom: 11
 });
 
-map.addControl(new mapboxgl.NavigationControl());
+//map.addControl(new mapboxgl.NavigationControl());
 map.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }));
 
 /* ==========================================
@@ -516,6 +633,13 @@ const facilityMarker = new mapboxgl.Marker(el)
   .setLngLat(facility)
   .setPopup(facilityPopup)
   .addTo(map);
+  
+// Tesis üzerinde geçici bilgilendirme yazısı
+const facilityLabel = document.createElement('div');
+facilityLabel.className = 'facility-intro-label';
+facilityLabel.textContent = 'Karacabey Biyogaz';
+
+el.appendChild(facilityLabel);
 
 /* ==========================================
    3. HEDEF MARKER ÜRETİCİ YARDIMCI FONKSİYON
@@ -693,6 +817,75 @@ $('homeBtn').onclick = () => {
     zoom: 11,          // Başlangıç zoom seviyesi
     essential: true    // Animasyon önceliği
   });
+};
+
+
+/* ANLIK KONUMUMU BUL */
+let userLocationMarker = null;
+
+$('locationBtn').onclick = () => {
+  if (!navigator.geolocation) {
+    alert('Tarayıcınız konum özelliğini desteklemiyor.');
+    return;
+  }
+
+  $('locationBtn').disabled = true;
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const coords = [
+        position.coords.longitude,
+        position.coords.latitude
+      ];
+
+      if (!userLocationMarker) {
+        const el = document.createElement('div');
+
+        el.style.cssText = `
+          width: 18px;
+          height: 18px;
+          background: #2563eb;
+          border: 3px solid white;
+          border-radius: 50%;
+          box-shadow: 0 0 0 6px rgba(37,99,235,.20);
+        `;
+
+        userLocationMarker = new mapboxgl.Marker(el)
+          .setLngLat(coords)
+          .setPopup(
+            new mapboxgl.Popup({ offset: 15 })
+              .setText('Anlık konumum')
+          )
+          .addTo(map);
+      } else {
+        userLocationMarker.setLngLat(coords);
+      }
+
+      map.flyTo({
+        center: coords,
+        zoom: 16,
+        essential: true
+      });
+
+      $('locationBtn').disabled = false;
+    },
+    (error) => {
+      $('locationBtn').disabled = false;
+
+      if (error.code === 1) {
+        alert('Konum izni verilmedi. Tarayıcı ayarlarından konum iznini açın.');
+      } else if (error.code === 2) {
+        alert('Konum bilgisi alınamadı.');
+      } else {
+        alert('Konum isteği zaman aşımına uğradı. Yeniden deneyin.');
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
+  );
 };
 
 
