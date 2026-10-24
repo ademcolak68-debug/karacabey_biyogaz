@@ -862,7 +862,7 @@ const $ = id => document.getElementById(id);
 
 /* ==========================================
    4. HARİTA KATMANLARI (GOOGLE UYDU / STANDART)
-   ========================================== */
+  ========================================== */
 map.on('load', () => {
   map.addSource('google-tiles', {
     type: 'raster',
@@ -877,21 +877,48 @@ map.on('load', () => {
     source: 'google-tiles',
     minzoom: 0,
     maxzoom: 24,
-    layout: { 'visibility': 'none' }
+    layout: { 'visibility': 'none' } // Başlangıçta kapalı (Mapbox görünür)
   });
 });
 
+// Google Uydu Butonu
 $('satBtn').onclick = () => {
   if (map.getLayer('google-tiles-layer')) {
+    // Google katmanını görünür yap
     map.setLayoutProperty('google-tiles-layer', 'visibility', 'visible');
+    
+    // Mapbox standart vektör katmanlarını tamamen gizle (böylece alttan görünmezler)
+    const layers = map.getStyle().layers;
+    layers.forEach(layer => {
+      // Mapbox'ın kendi standart cadde/arazi katmanlarını gizliyoruz (google-tiles hariç)
+      if (layer.id !== 'google-tiles-layer' && !layer.id.includes('marker') && !layer.id.includes('popup')) {
+        if (map.getLayer(layer.id)) {
+          map.setLayoutProperty(layer.id, 'visibility', 'none');
+        }
+      }
+    });
+
     $('satBtn').classList.add('active');
     $('osmBtn').classList.remove('active');
   }
 };
 
+// OSM / Standart Mapbox Butonu
 $('osmBtn').onclick = () => {
   if (map.getLayer('google-tiles-layer')) {
+    // Google katmanını gizle
     map.setLayoutProperty('google-tiles-layer', 'visibility', 'none');
+    
+    // Mapbox standart vektör katmanlarını tekrar görünür yap
+    const layers = map.getStyle().layers;
+    layers.forEach(layer => {
+      if (layer.id !== 'google-tiles-layer' && !layer.id.includes('marker') && !layer.id.includes('popup')) {
+        if (map.getLayer(layer.id)) {
+          map.setLayoutProperty(layer.id, 'visibility', 'visible');
+        }
+      }
+    });
+
     $('osmBtn').classList.add('active');
     $('satBtn').classList.remove('active');
   }
