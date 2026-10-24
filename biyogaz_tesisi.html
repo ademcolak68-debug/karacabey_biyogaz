@@ -160,11 +160,17 @@
 		
 /* Tablet ve telefon uyumu: PC görünümünü değiştirmez */
     #canvasContainer {
-      min-width: 0;
-      min-height: 0;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-    }
+	  min-width: 0;
+	  min-height: 0;
+	  overflow: auto;
+	  overscroll-behavior: contain;
+	  -webkit-overflow-scrolling: touch;
+	  touch-action: pan-x pan-y;
+	}
+
+	#printableArea {
+	  flex: 0 0 auto;
+	}
 
     .zoom-controls {
       top: 15px;
@@ -990,37 +996,48 @@ const zoomMax = 4;
 let baslangicGenislik = 0;
 let baslangicYukseklik = 0;
 
+
 function zoomUygula(eskiZoom = zoomSeviyesi) {
     const alan = document.getElementById('printableArea');
     const gosterge = document.getElementById('zoomVal');
 
     if (!alan || !canvasContainer) return;
 
-    // Başlangıç boyutlarını yalnızca bir kez al
     if (!baslangicGenislik || !baslangicYukseklik) {
         baslangicGenislik = alan.clientWidth;
         baslangicYukseklik = alan.clientHeight;
     }
 
-    // Görünüm merkezini koru
+    // Mevcut görünüm merkezini koru
     const merkezX = canvasContainer.scrollLeft + canvasContainer.clientWidth / 2;
     const merkezY = canvasContainer.scrollTop + canvasContainer.clientHeight / 2;
+
     const oranX = merkezX / (baslangicGenislik * eskiZoom);
     const oranY = merkezY / (baslangicYukseklik * eskiZoom);
 
-    // Çizim alanını fiziksel olarak büyüt; kaydırma çubukları oluşsun
+    // Çizim alanını fiziksel olarak büyüt
     alan.style.maxWidth = 'none';
     alan.style.maxHeight = 'none';
     alan.style.width = (baslangicGenislik * zoomSeviyesi) + 'px';
     alan.style.height = (baslangicYukseklik * zoomSeviyesi) + 'px';
+    alan.style.flex = '0 0 auto';
     alan.style.flexShrink = '0';
     alan.style.transform = 'none';
 
-    // Aynı çizim noktasını ekranın merkezinde tut
-    canvasContainer.scrollLeft =
-        Math.max(0, oranX * baslangicGenislik * zoomSeviyesi - canvasContainer.clientWidth / 2);
-    canvasContainer.scrollTop =
-        Math.max(0, oranY * baslangicYukseklik * zoomSeviyesi - canvasContainer.clientHeight / 2);
+    // Yakınlaştırma merkezini koru
+    requestAnimationFrame(() => {
+        canvasContainer.scrollLeft = Math.max(
+            0,
+            oranX * baslangicGenislik * zoomSeviyesi -
+            canvasContainer.clientWidth / 2
+        );
+
+        canvasContainer.scrollTop = Math.max(
+            0,
+            oranY * baslangicYukseklik * zoomSeviyesi -
+            canvasContainer.clientHeight / 2
+        );
+    });
 
     if (gosterge) {
         gosterge.textContent = Math.round(zoomSeviyesi * 100) + '%';
@@ -1051,6 +1068,7 @@ function resetZoom() {
         alan.style.height = '';
         alan.style.maxWidth = '';
         alan.style.maxHeight = '';
+        alan.style.flex = '';
         alan.style.flexShrink = '';
         alan.style.transform = '';
     }
@@ -1061,7 +1079,9 @@ function resetZoom() {
     }
 
     const gosterge = document.getElementById('zoomVal');
-    if (gosterge) gosterge.textContent = '100%';
+    if (gosterge) {
+        gosterge.textContent = '100%';
+    }
 }
 
 // Mouse tekerleğiyle yakınlaştırma / uzaklaştırma
@@ -1075,30 +1095,11 @@ canvasContainer.addEventListener('wheel', function(e) {
     }
 }, { passive: false });
 
-	let suruklemeX = 0;
-let suruklemeY = 0;
+// Telefon ve dokunmatik ekranda kaydırma
+canvasContainer.style.overflow = 'auto';
+canvasContainer.style.touchAction = 'pan-x pan-y';
+canvasContainer.style.webkitOverflowScrolling = 'touch';
 
-canvasContainer.addEventListener('touchstart', function(e) {
-    if (e.touches.length !== 1) return;
-
-    suruklemeX = e.touches[0].clientX;
-    suruklemeY = e.touches[0].clientY;
-}, { passive: true });
-
-canvasContainer.addEventListener('touchmove', function(e) {
-    if (e.touches.length !== 1) return;
-
-    e.preventDefault();
-
-    const x = e.touches[0].clientX;
-    const y = e.touches[0].clientY;
-
-    canvasContainer.scrollLeft -= x - suruklemeX;
-    canvasContainer.scrollTop -= y - suruklemeY;
-
-    suruklemeX = x;
-    suruklemeY = y;
-}, { passive: false });
 
 	
 
