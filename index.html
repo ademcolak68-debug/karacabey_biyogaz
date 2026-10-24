@@ -69,28 +69,91 @@ body {
 }
 
 /* ==========================================
-   2. ÜST BİLGİ ALANI (HEADER) - ORTALANMIŞ
+   2. ÜST BİLGİ ALANI - KURUMSAL TASARIM
    ========================================== */
 .top {
   position: sticky;
   top: 0;
   z-index: 1000;
-  padding: 16px 20px;
-  background: #123b32;
+  padding: 17px 20px 14px;
+  background: linear-gradient(135deg, #123b32 0%, #185747 100%);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
   text-align: center;
 }
 
 .top h1 {
-  font-size: 21px;
-  margin: 0 0 5px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1.35;
+  margin: 0 0 9px;
+}
+
+.installed-power {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto 9px;
+  color: #dcece5;
+  font-size: 12px;
+  letter-spacing: 0.7px;
+}
+
+.installed-power strong {
+  color: #f6d58a;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.power-line {
+  width: 24px;
+  height: 1px;
+  background: rgba(246, 213, 138, 0.65);
 }
 
 .top p {
   margin: 0;
-  font-size: 13px;
-  opacity: .88;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #d4e4de;
+}
+
+.top p span {
+  color: #f6d58a;
+  padding: 0 3px;
+}
+
+/* Telefon uyumu */
+@media screen and (max-width: 480px) {
+  .top {
+    padding: 12px 10px 11px;
+  }
+
+  .top h1 {
+    font-size: 17px;
+    margin-bottom: 7px;
+  }
+
+  .installed-power {
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 11px;
+  }
+
+  .installed-power strong {
+    font-size: 15px;
+  }
+
+  .power-line {
+    width: 17px;
+  }
+
+  .top p {
+    font-size: 10px;
+  }
 }
 
 /* ==========================================
@@ -381,6 +444,9 @@ button:focus {
 }
 
 
+
+
+
 /* Tesis Detayı Butonu - Diğerlerinden Farklı Zemin ve Hover Tasarımı */
 .detail-btn {
   display: inline-flex;
@@ -513,8 +579,14 @@ button:focus {
 
 <!-- ÜST BAŞLIK BÖLÜMÜ -->
 <header class="top">
-  <h1>Karacabey biyogaz enerji üretim <span style="font-size: 16px; font-weight: normal; opacity: 0.9; margin-left: 10px;">(Kurulu Güç: 100 kW)</span></h1>
-  <p>Tesis konumu · Güzergâh seçenekleri · Yol mesafesi ve tahmini süre</p>
+  <h1>Karacabey Biyogaz Enerji Üretim</h1>
+  <div class="installed-power">
+    <span class="power-line"></span>
+    <span>Kurulu Güç</span>
+    <strong>225 kW</strong>
+    <span class="power-line"></span>
+  </div>
+  <p>Tesis konumu <span>·</span> Güzergâh seçenekleri <span>·</span> Yol mesafesi ve tahmini süre</p>
 </header>
 
 <main class="wrap">
