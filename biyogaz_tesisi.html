@@ -159,18 +159,18 @@
         }
 		
 /* Tablet ve telefon uyumu: PC görünümünü değiştirmez */
-    #canvasContainer {
-	  min-width: 0;
-	  min-height: 0;
-	  overflow: auto;
-	  overscroll-behavior: contain;
-	  -webkit-overflow-scrolling: touch;
-	  touch-action: pan-x pan-y;
-	}
+   #canvasContainer {
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: none;
+}
 
-	#printableArea {
-	  flex: 0 0 auto;
-	}
+#printableArea {
+    flex: 0 0 auto;
+}
 
     .zoom-controls {
       top: 15px;
@@ -986,16 +986,12 @@
 	
 	
 	
-	const canvasContainer = document.getElementById('canvasContainer');
-
-// Zoom Kontrolü
 let zoomSeviyesi = 1;
 const zoomAdimi = 0.2;
 const zoomMin = 1;
 const zoomMax = 4;
 let baslangicGenislik = 0;
 let baslangicYukseklik = 0;
-
 
 function zoomUygula(eskiZoom = zoomSeviyesi) {
     const alan = document.getElementById('printableArea');
@@ -1008,14 +1004,12 @@ function zoomUygula(eskiZoom = zoomSeviyesi) {
         baslangicYukseklik = alan.clientHeight;
     }
 
-    // Mevcut görünüm merkezini koru
     const merkezX = canvasContainer.scrollLeft + canvasContainer.clientWidth / 2;
     const merkezY = canvasContainer.scrollTop + canvasContainer.clientHeight / 2;
 
     const oranX = merkezX / (baslangicGenislik * eskiZoom);
     const oranY = merkezY / (baslangicYukseklik * eskiZoom);
 
-    // Çizim alanını fiziksel olarak büyüt
     alan.style.maxWidth = 'none';
     alan.style.maxHeight = 'none';
     alan.style.width = (baslangicGenislik * zoomSeviyesi) + 'px';
@@ -1024,7 +1018,6 @@ function zoomUygula(eskiZoom = zoomSeviyesi) {
     alan.style.flexShrink = '0';
     alan.style.transform = 'none';
 
-    // Yakınlaştırma merkezini koru
     requestAnimationFrame(() => {
         canvasContainer.scrollLeft = Math.max(
             0,
@@ -1095,10 +1088,87 @@ canvasContainer.addEventListener('wheel', function(e) {
     }
 }, { passive: false });
 
-// Telefon ve dokunmatik ekranda kaydırma
+// Kaydırma ve dokunmatik ayarları
 canvasContainer.style.overflow = 'auto';
-canvasContainer.style.touchAction = 'pan-x pan-y';
+canvasContainer.style.touchAction = 'none';
 canvasContainer.style.webkitOverflowScrolling = 'touch';
+
+const dokunmaMesafesi = (touches) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
+};
+
+let baslangicMesafesi = 0;
+let pinchBaslangicZoom = 1;
+let oncekiX = 0;
+let oncekiY = 0;
+let tekParmakSurukleme = false;
+
+canvasContainer.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+        tekParmakSurukleme = false;
+        baslangicMesafesi = dokunmaMesafesi(e.touches);
+        pinchBaslangicZoom = zoomSeviyesi;
+    } else if (e.touches.length === 1) {
+        tekParmakSurukleme = true;
+        oncekiX = e.touches[0].clientX;
+        oncekiY = e.touches[0].clientY;
+    }
+}, { passive: false });
+
+canvasContainer.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+
+    if (e.touches.length === 2) {
+        tekParmakSurukleme = false;
+
+        const yeniMesafe = dokunmaMesafesi(e.touches);
+        if (baslangicMesafesi <= 0) return;
+
+        const yeniZoom = Math.max(
+            zoomMin,
+            Math.min(
+                zoomMax,
+                pinchBaslangicZoom * yeniMesafe / baslangicMesafesi
+            )
+        );
+
+        if (Math.abs(yeniZoom - zoomSeviyesi) >= 0.005) {
+            const eskiZoom = zoomSeviyesi;
+            zoomSeviyesi = yeniZoom;
+            zoomUygula(eskiZoom);
+        }
+    } else if (e.touches.length === 1 && tekParmakSurukleme) {
+        const x = e.touches[0].clientX;
+        const y = e.touches[0].clientY;
+
+        canvasContainer.scrollLeft -= x - oncekiX;
+        canvasContainer.scrollTop -= y - oncekiY;
+
+        oncekiX = x;
+        oncekiY = y;
+    }
+}, { passive: false });
+
+canvasContainer.addEventListener('touchend', function(e) {
+    if (e.touches.length < 2) {
+        baslangicMesafesi = 0;
+    }
+
+    if (e.touches.length === 1) {
+        oncekiX = e.touches[0].clientX;
+        oncekiY = e.touches[0].clientY;
+        tekParmakSurukleme = true;
+    } else if (e.touches.length === 0) {
+        tekParmakSurukleme = false;
+    }
+}, { passive: true });
+
+canvasContainer.addEventListener('touchcancel', function() {
+    baslangicMesafesi = 0;
+    tekParmakSurukleme = false;
+}, { passive: true });
 
 
 	
