@@ -588,6 +588,25 @@ button:focus {
   }
 }
 
+.map-signature {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  z-index: 5;
+  padding: 3px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 4px;
+  background: rgba(18, 59, 50, 0.8);
+  color: #f6d58a;
+  font-family: Georgia, serif;
+  font-size: 10px;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
 
 </style>
 </head>
@@ -634,6 +653,9 @@ button:focus {
 		title="Anlık konumumu bul">
 	  <i class="fa-solid fa-location-crosshairs"></i>
 	</button>
+
+	<div class="map-signature">Yük Çevre Müh Beyza Üstünsoy</div
+		
 	</div>
 
     <!-- İSTATİSTİK VE GÜZERGÂH ÇİZME BUTONLARI -->
@@ -673,7 +695,8 @@ const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/streets-v12',
   center: facility,
-  zoom: 11
+  zoom: 12,
+  attributionControl: false,
 });
 
 //map.addControl(new mapboxgl.NavigationControl());
