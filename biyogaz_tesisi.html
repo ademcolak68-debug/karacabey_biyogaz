@@ -1075,6 +1075,32 @@ canvasContainer.addEventListener('wheel', function(e) {
     }
 }, { passive: false });
 
+// Telefonda tek parmakla sağa-sola ve yukarı-aşağı kaydırma
+let dokunmaX = 0;
+let dokunmaY = 0;
+
+canvasContainer.addEventListener('touchstart', function(e) {
+    if (e.touches.length !== 1) return;
+
+    dokunmaX = e.touches[0].clientX;
+    dokunmaY = e.touches[0].clientY;
+}, { passive: true });
+
+canvasContainer.addEventListener('touchmove', function(e) {
+    if (e.touches.length !== 1) return;
+
+    e.preventDefault();
+
+    const yeniX = e.touches[0].clientX;
+    const yeniY = e.touches[0].clientY;
+
+    canvasContainer.scrollLeft -= yeniX - dokunmaX;
+    canvasContainer.scrollTop -= yeniY - dokunmaY;
+
+    dokunmaX = yeniX;
+    dokunmaY = yeniY;
+}, { passive: false });
+
 	
 
   </script>
