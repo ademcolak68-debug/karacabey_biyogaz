@@ -14,28 +14,13 @@
 /* ==========================================
    1. GENEL RESET VE TAHOMA FONT AYARLARI
    ========================================== */
-
-@font-face {
-  font-family: 'TahomaLocal';
-  src: url('./tahoma.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'TahomaLocal';
-  src: url('./tahomabd.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-}
-	
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: 'TahomaLocal', Tahoma, sans-serif;
+  font-family: Tahoma, sans-serif;
   background: #f2f5f7;
   color: #1e293b;
 }
@@ -90,50 +75,93 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
-  padding: 17px 20px 14px;
-  background: linear-gradient(135deg, #123b32 0%, #185747 100%);
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #0e2a24 0%, #16483b 100%);
   color: #fff;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(0, 230, 64, 0.15);
+}
+
+.top-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+}
+
+/* PC: Sol Logo Sabitleme */
+.header-logo-link {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  z-index: 2;
+}
+
+/* PNG Logo Boyutu */
+.header-logo-img {
+  height: 45px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  padding: 5px 9px;
+  background: rgba(0, 0, 0, 0.3); /* Arka plan derinliği */
+  border: 1px solid rgba(0, 230, 64, 0.6); /* Çerçeve yeşili daha belirgin */
+  border-radius: 6px;
+  /* Işıltı ve parlaklık artırıldı (Glow efekti) */
+  box-shadow: 0 0 16px rgba(0, 230, 64, 0.45), inset 0 0 8px rgba(0, 230, 64, 0.2);
+}
+
+/* PC: Ortalanmış Bilgi Alanı */
+.header-info {
   text-align: center;
+  width: 100%;
 }
 
 .top h1 {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.3px;
-  line-height: 1.35;
-  margin: 0 0 9px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  color: #ffffff;
 }
 
 .installed-power {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin: 0 auto 9px;
+  gap: 8px;
+  margin: 0 auto 5px;
   color: #dcece5;
   font-size: 12px;
-  letter-spacing: 0.7px;
+  letter-spacing: 0.6px;
 }
 
 .installed-power strong {
   color: #f6d58a;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.4px;
 }
 
 .power-line {
-  width: 24px;
+  width: 20px;
   height: 1px;
   background: rgba(246, 213, 138, 0.65);
 }
 
 .top p {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #d4e4de;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #b3d3c7;
   white-space: nowrap;
 }
 
@@ -142,33 +170,61 @@ body {
   padding: 0 3px;
 }
 
-/* Telefon uyumu */
-@media screen and (max-width: 480px) {
+/* ==========================================
+   768PX VE ALTI (TABLET / MOBİL) UYUMU
+   ========================================== */
+@media screen and (max-width: 768px) {
   .top {
-    padding: 12px 10px 11px;
+    padding: 10px 12px;
+  }
+
+  .top-content {
+    flex-direction: column;
+    align-items: center;
+    min-height: auto;
+  }
+
+  /* Mobil: Logo sol üste geçer, yazılardan ayrılır */
+  .header-logo-link {
+    position: static;
+    transform: none;
+    align-self: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .header-logo-img {
+    height: 35px; /* Mobilde daha kompakt boyut */
+  }
+
+  /* Mobil: Yazılar hizanıp tam ortalı kalır */
+  .header-info {
+    text-align: center;
+    width: 100%;
   }
 
   .top h1 {
-    font-size: 17px;
-    margin-bottom: 7px;
+    font-size: 15px;
+    margin-bottom: 4px;
   }
 
   .installed-power {
-    gap: 8px;
-    margin-bottom: 7px;
     font-size: 11px;
+    margin-bottom: 4px;
+    gap: 6px;
   }
 
   .installed-power strong {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .power-line {
-    width: 17px;
+    width: 16px;
   }
 
   .top p {
     font-size: 10px;
+    white-space: normal;
+    line-height: 1.3;
   }
 }
 
@@ -255,7 +311,7 @@ button.active {
   content: "";
   position: absolute;
   top: -11px;
-  left: 40%;
+  left: 30%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
@@ -368,7 +424,7 @@ button:focus {
 .map-home-btn {
   position: absolute;
   top: 10px;
-  left: 10px;
+  left: 5px;
   z-index: 10;
   background-color: #ffffff;
   color: #123b32;
@@ -603,6 +659,7 @@ button:focus {
   }
 }
 
+
 .map-signature {
   position: absolute;
   right: 6px;
@@ -622,18 +679,24 @@ button:focus {
   pointer-events: none;
 }
 
+
+
+
+@font-face {
+  font-family: 'TahomaLocal';
+  src: url('./tahoma.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body,
 button,
 input,
 select,
 textarea {
-  font-family: Tahoma, sans-serif;
-}
-
-body,
-body * {
   font-family: 'TahomaLocal', Tahoma, sans-serif;
 }
+
 
 </style>
 </head>
@@ -641,14 +704,28 @@ body * {
 
 <!-- ÜST BAŞLIK BÖLÜMÜ -->
 <header class="top">
-  <h1>Karacabey Biyogaz Enerji Üretim</h1>
-  <div class="installed-power">
-    <span class="power-line"></span>
-    <span>Kurulu Güç</span>
-    <strong>225 kW</strong>
-    <span class="power-line"></span>
+  <div class="top-content">
+    
+    <!-- SOL TARAF: Orijinal PNG Logo -->
+    <a href="#" class="header-logo-link" title="FORMEX Zero Waste Integration">
+      <img src="logo.png" alt="FORMEX Zero Waste Integration" class="header-logo-img">
+    </a>
+
+    <!-- SAĞ/ORTA TARAF: Başlık ve Detaylar -->
+    <div class="header-info">
+      <h1>Karacabey Biyogaz Enerji Üretim</h1>
+      
+      <div class="installed-power">
+        <span class="power-line"></span>
+        <span>Kurulu Güç</span>
+        <strong>225 kW</strong>
+        <span class="power-line"></span>
+      </div>
+
+      <p>Tesis konumu <span>·</span> Güzergâh seçenekleri <span>·</span> Yol mesafesi ve tahmini süre</p>
+    </div>
+
   </div>
-  <p>Tesis konumu <span>·</span> Güzergâh seçenekleri <span>·</span> Yol mesafesi ve tahmini süre</p>
 </header>
 
 <main class="wrap">
@@ -669,7 +746,6 @@ body * {
     <div style="position: relative;">
 		  <!-- Harita Alanı -->
 		  <div id="map"></div>
-		  <div class="map-signature">Yük Çevre Müh Beyza Üstünsoy</div
 		  
 		  <!-- Harita Üstü Şık Home Butonu -->
 		  <button id="homeBtn" class="map-home-btn" title="Başlangıç Konumuna Dön">
@@ -682,6 +758,8 @@ body * {
 		  <i class="fa-solid fa-location-crosshairs"></i>
 		</button>
 		
+		<div class="map-signature">Yük Çevre Müh Beyza Üstünsoy</div>
+		
 	</div>
 
     <!-- İSTATİSTİK VE GÜZERGÂH ÇİZME BUTONLARI -->
@@ -693,7 +771,7 @@ body * {
       </div>
       <div class="bottom-row">
         <div class="btn-group" style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
-          <button class="primary" id="routeFormeksBtn">Tesis → Formeks Güzergâhını Çiz</button>
+          <button class="primary" id="routeFormeksBtn">Tesis → Formex Güzergâhını Çiz</button>
           <button id="routeKaracabeyBtn">Tesis → Karacabey Merkez Güzergâhını Çiz</button>
         </div>
       </div>
@@ -721,9 +799,14 @@ const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/streets-v12',
   center: facility,
-  zoom: 12,
+  zoom: 14,
   attributionControl: false,
 });
+
+map.addControl(
+  new mapboxgl.AttributionControl({ compact: true }),
+  'bottom-left'
+);
 
 //map.addControl(new mapboxgl.NavigationControl());
 map.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }));
@@ -738,7 +821,7 @@ el.innerHTML = '<i class="fa-solid fa-industry"></i>';
 
 // Tesis Başlangıç Konumu Popup ve Marker Tanımlaması
 const facilityPopup = new mapboxgl.Popup({ offset: 25, closeButton: false, closeOnClick: false })
-  .setHTML('<b>Karacabey Biyogaz Tesisi</b>');
+  .setHTML('<b>Karacabey Biyogaz</b>');
 
 const facilityMarker = new mapboxgl.Marker(el)
   .setLngLat(facility)
@@ -767,7 +850,7 @@ function createDestinationMarker(coords, title, subtitle, color, scale = 0.6) {
 }
 
 // Formeks ve Karacabey Merkez Hedef Tanımları
-const formeksDest = createDestinationMarker(formeks, 'Formeks', 'Hedef konum', '#e3342f');
+const formeksDest = createDestinationMarker(formeks, 'Formex', 'Hedef konum', '#e3342f');
 const formeksMarker = formeksDest.marker;
 const formeksPopup = formeksDest.popup;
 
